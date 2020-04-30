@@ -3,7 +3,7 @@
 using namespace std;
 
 /**
- * Funkcja kompresuje dane otrzymane jako wskaznik, i zwraca skompresowane
+ * Main program feature - compress algorithm
  *
  * @param buffer
  * @param outputFileName

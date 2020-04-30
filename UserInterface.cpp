@@ -1,19 +1,32 @@
 #include "UserInterface.h"
 #include <SFML/Graphics.hpp>
+#include "File.h"
 
 
+/**
+ * Handle file and start compress
+ * @param filePath
+ */
+void UserInterface::handleFile(string filePath) {
+    File f = File(filePath);
+    f.processData();
+}
+
+/**
+ * User interface class
+ */
 void UserInterface::displayInterface() {
-    sf::RenderWindow window(sf::VideoMode(640,480,32),"Hello SFML");
+    sf::RenderWindow window(sf::VideoMode(640,480,32),"EPS Compress");
 
 
 
     sf::Font font;
 
-    font.loadFromFile("OpenSans-Bold.ttf");
+    font.loadFromFile("../font.ttf");
 
 
 
-    sf::Text text("Hello World",font,11);
+    sf::Text text("Compress your EPS file", font,11);
 
     text.setCharacterSize(32);
 

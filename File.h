@@ -11,15 +11,16 @@ class File {
 private:
     string inFileName;
     string outFileName;
-    fstream inputFile;
-    fstream outputFile;
+    string filePath;
 
 public:
-    File(string in, string out) : inFileName(in), outFileName(out) {};
-    ~File();
-    void openInputFile();
-    void createOutputFile();
+    File() {};
+    File(string filePath);
+    ~File() {};
     void processData();
+    string getFileNameFromPath(string filePath);
+    string getInFileName();
+    string getOutFileName();
 };
 
 

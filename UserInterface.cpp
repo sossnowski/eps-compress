@@ -18,26 +18,6 @@ void UserInterface::handleFile(string filePath) {
 void UserInterface::displayInterface() {
     sf::RenderWindow window(sf::VideoMode(640,480,32),"EPS Compress");
 
-
-
-    sf::Font font;
-
-    font.loadFromFile("../font.ttf");
-
-
-
-    sf::Text text("Compress your EPS file", font,11);
-
-    text.setCharacterSize(32);
-
-    text.setPosition(window.getSize().x/2 - text.getGlobalBounds().width/2,
-
-                     window.getSize().y/2 - text.getGlobalBounds().height/2);
-
-
-
-
-
     while(window.isOpen()){
 
 
@@ -55,8 +35,6 @@ void UserInterface::displayInterface() {
 
 
             window.clear(sf::Color::Black);
-
-            window.draw(text);
 
             window.display();
 

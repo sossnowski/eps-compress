@@ -12,7 +12,7 @@ class Compress {
 public:
     Compress();
     ~Compress();
-    unique_ptr<char[]> compressData(unique_ptr<char[]> buffer);
+    unique_ptr<char []> compressData(unique_ptr<char[]> buffer, string outputFileName);
 };
 
 

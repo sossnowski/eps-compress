@@ -3,4 +3,4 @@ project(epsCompress)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(epsCompress main.cpp compress.cpp compress.h)
+add_executable(epsCompress main.cpp compress.cpp compress.h File.cpp File.h)

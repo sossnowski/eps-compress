@@ -1,4 +1,4 @@
-#include "compress.h"
+#include "Compress.h"
 
 using namespace std;
 

@@ -15,7 +15,7 @@ private:
     fstream outputFile;
 
 public:
-    File();
+    File(string in, string out) : inFileName(in), outFileName(out) {};
     ~File();
     void openInputFile();
     void createOutputFile();

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-int main() {
+int main(int argc, char *argv[]) {
 
     ifstream bigFile("../tmp.txt");
     constexpr size_t bufferSize = 10;
@@ -16,6 +16,5 @@ int main() {
 
 
 
-    cout << "111" << endl;
     return 0;
 }

@@ -21,6 +21,7 @@ public:
     string getFileNameFromPath(string filePath);
     string getInFileName();
     string getOutFileName();
+    void saveToOutputFile(string* line);
 };
 
 

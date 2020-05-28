@@ -5,11 +5,13 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-    UserInterface u = UserInterface();
-    u.displayInterface();
+    //UserInterface u = UserInterface();
+    //u.displayInterface();
     //Trigger action button and get user file path
-    string filePath;
-    u.handleFile(filePath);
+    string filePath = "../epsFiles/test.eps";
+    //u.handleFile(filePath);
+    File f = File(filePath);
+    f.processData();
 
 
 

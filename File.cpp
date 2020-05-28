@@ -1,3 +1,7 @@
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <vector>
 #include "File.h"
 #include "Compress.h"
 
@@ -19,15 +23,38 @@ File::File(string filePath){
  * Read data from file and save compressed to new file
  */
 void File::processData() {
-    fstream inputFile, outputFile;
-    inputFile.open( this->inFileName , ios::in);
+    const int numberOfCoordsForFunctionComputing = 3;
+    const float compressionRate = 0.1;
+    ifstream inputFile(this->filePath);
+    float x, y;
+    string line, c;
+    int lineCounter = 0;
+    Compress co = Compress();
+    string dataFromFile;
+    while (getline(inputFile, line)) {
+        istringstream iss(line);
+        if (!(iss >> x >> y >> c)) {
+            this->saveToOutputFile(&line);
+            continue;
+        }
+        line += "\n";
+        dataFromFile += line;
+        lineCounter++;
+
+        if (lineCounter == numberOfCoordsForFunctionComputing) {
+            co.compressData(&dataFromFile);
+            //this->saveToOutputFile(&dataFromFile);
+            dataFromFile = "";
+            lineCounter = 0;
+        }
+    }
+    co.compressData(&dataFromFile);
+
+    co.computeCoordinates();
 
     //process data - get chunks of data from input file and compress it
-    Compress c = Compress();
-    //c.compressData()
 
-    //save final file
-    outputFile.open( this->inFileName , ios::out);
+    //c.compressData()
 }
 
 /**
@@ -55,4 +82,10 @@ string File::getInFileName() {
  */
 string File::getOutFileName() {
     return this->outFileName;
+}
+
+void File::saveToOutputFile(string* line) {
+    ofstream outputFile(this->outFileName, ios_base::app | ios_base::out);
+    *line += "\n";
+    outputFile << *line;
 }

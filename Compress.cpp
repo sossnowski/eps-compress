@@ -33,7 +33,6 @@ void Compress::compressData(string* dataToCompress) {
 
 
 void Compress::computeCoordinates() {
-    cout << "siema" <<endl;
     sort( this->oldCoordinates.begin( ), this->oldCoordinates.end( ), [ ]( const auto& lhs, const auto& rhs ){
         return lhs.x < rhs.x;
     });
@@ -60,20 +59,28 @@ void Compress::computeCoordinates() {
         }
     }
     cout << this->oldCoordinates.size() <<endl;
-    //wspolr`edne wyluczajac te nachodzace na siebie
-    long int commonCoverCoordinatesLength = this->coverXCoordinates.size() > this->coverYCoordinates.size() ?
-            this->coverYCoordinates.size() : this->coverXCoordinates.size();
-    for (int i = 0; i < commonCoverCoordinatesLength ; ++i) {
-        if (find(this->coverXCoordinates.begin(), this->coverXCoordinates.end(), this->coverYCoordinates[i]) != this->coverXCoordinates.end()) {
-            this->oldCoordinates.erase(this->oldCoordinates.begin() + this->coverYCoordinates[i] - 1);
+    vector<long int>commonIndexes;
+    if (this->coverXCoordinates.size() > this->coverYCoordinates.size()) {
+        for (int i = 0; i < this->coverYCoordinates.size() ; ++i) {
+            if (find(this->coverXCoordinates.begin(), this->coverXCoordinates.end(), this->coverYCoordinates[i]) != this->coverXCoordinates.end()) {
+                commonIndexes.push_back(this->coverYCoordinates[i]);
+            }
+        }
+    } else {
+        for (int i = 0; i < this->coverXCoordinates.size() ; ++i) {
+            if (find(this->coverYCoordinates.begin(), this->coverYCoordinates.end(), this->coverXCoordinates[i]) != this->coverYCoordinates.end()) {
+                commonIndexes.push_back(this->coverXCoordinates[i]);
+            }
         }
     }
-
-    for (int i = 0; i < this->oldCoordinates.size() ; ++i) {
-        cout << this->oldCoordinates[i].x <<endl;
+    //wspolr`edne wyluczajac te nachodzace na siebie
+    //mam indexy tablicy do usuniecia ale jak usune jeden z nich to juz tablica sie przesuwa i indexy sie zmieniaja - rozkmin
+    cout << commonIndexes.size() <<endl;
+    for (int i = 0; i < commonIndexes.size() ; ++i) {
+        this->oldCoordinates.erase(this->oldCoordinates.begin() + commonIndexes[i] - 1 - i);
     }
 
-    cout << this->oldCoordinates.size()<< "aaa" <<endl;
+    cout << this->oldCoordinates.size() <<endl;
 }
 
 

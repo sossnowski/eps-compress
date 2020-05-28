@@ -23,7 +23,7 @@ File::File(string filePath){
  * Read data from file and save compressed to new file
  */
 void File::processData() {
-    const int numberOfCoordsForFunctionComputing = 3;
+    const int numberOfCoordsForFunctionComputing = 100;
     const float compressionRate = 0.1;
     ifstream inputFile(this->filePath);
     float x, y;

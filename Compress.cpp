@@ -38,10 +38,6 @@ void Compress::computeCoordinates() {
         return lhs.x < rhs.x;
     });
 
-    for (int i = 0; i < this->oldCoordinates.size() ; ++i) {
-        cout << this->oldCoordinates[i].x <<endl;
-    }
-
     float tmpCoord = this->oldCoordinates[0].x;
     for (int i = 1; i < this->oldCoordinates.size() - 1 ; ++i) {
         if (abs( this->oldCoordinates[i].x - tmpCoord ) < 1) {
@@ -63,14 +59,21 @@ void Compress::computeCoordinates() {
             tmpCoord = this->oldCoordinates[i].y;
         }
     }
+    cout << this->oldCoordinates.size() <<endl;
     //wspolr`edne wyluczajac te nachodzace na siebie
     long int commonCoverCoordinatesLength = this->coverXCoordinates.size() > this->coverYCoordinates.size() ?
             this->coverYCoordinates.size() : this->coverXCoordinates.size();
     for (int i = 0; i < commonCoverCoordinatesLength ; ++i) {
-        if ( std::find(this->coverYCoordinates.begin(), this->coverYCoordinates.end(), this->coverYCoordinates[i]) != this->coverYCoordinates.end()) {
+        if (find(this->coverXCoordinates.begin(), this->coverXCoordinates.end(), this->coverYCoordinates[i]) != this->coverXCoordinates.end()) {
             this->oldCoordinates.erase(this->oldCoordinates.begin() + this->coverYCoordinates[i] - 1);
         }
     }
+
+    for (int i = 0; i < this->oldCoordinates.size() ; ++i) {
+        cout << this->oldCoordinates[i].x <<endl;
+    }
+
+    cout << this->oldCoordinates.size()<< "aaa" <<endl;
 }
 
 

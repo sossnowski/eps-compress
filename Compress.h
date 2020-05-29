@@ -10,6 +10,8 @@ using namespace std;
 class Compress {
 private:
     vector<Coords>coordinates;
+    vector<Coords>newCoordinates;
+    vector<Coords>oldCoordinates;
     vector<long int>coverXCoordinates;
     vector<long int>coverYCoordinates;
     vector<long int>commonIndexes;
@@ -21,7 +23,7 @@ private:
 public:
     Compress() : numberOfCurrentLine(0), previousX(0), previousY(0), previousC(""), flag(true) {};
     ~Compress() {};
-    vector<Coords>* getCoordinates();
+    vector<Coords>* getNewCoordinates();
     void compressData(string* dataToCompress);
     void computeCoordinates();
     void sortVectorByX(vector<Coords>*v);
@@ -29,6 +31,8 @@ public:
     void generateCoveringXCoords();
     void generateCoveringYCoords();
     void findCommonIndexes();
+    void setFinalCoordinates();
+    float roundToTwoDecimal(float val);
 };
 
 

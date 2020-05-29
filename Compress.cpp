@@ -15,6 +15,7 @@ void Compress::compressData(string* dataToCompress) {
     string c;
     istringstream f(*dataToCompress);
     while (f >> x >> y >> c) {
+        this->oldCoordinates.push_back({ x, y, this->numberOfCurrentLine});
         if (c != this->previousC && this->flag) {
             this->coordinates.push_back({ x, y, this->numberOfCurrentLine++});
             this->flag = false;
@@ -35,12 +36,9 @@ void Compress::compressData(string* dataToCompress) {
  */
 void Compress::computeCoordinates() {
     this->sortVectorByX(&this->coordinates);
-
-    sort( this->coordinates.begin( ), this->coordinates.end( ), [ ]( const auto& lhs, const auto& rhs ){
-        return lhs.y < rhs.y;
-    });
-
     this->generateCoveringXCoords();
+
+    this->sortVectorByY(&this->coordinates);
     this->generateCoveringYCoords();
 
     cout << this->coordinates.size() <<endl;
@@ -49,11 +47,13 @@ void Compress::computeCoordinates() {
     cout << this->commonIndexes.size() <<endl;
 
     // cut common coordinates from coordinates vector
+    this->newCoordinates = this->oldCoordinates;
     for (int i = 0; i < this->commonIndexes.size() ; ++i) {
-        this->coordinates.erase(this->coordinates.begin() + this->commonIndexes[i] - i);
+        this->newCoordinates.erase(this->newCoordinates.begin() + this->commonIndexes[i] - i);
     }
 
-    cout << this->coordinates.size() <<endl;
+    cout << this->oldCoordinates.size() <<endl;
+    //this->setFinalCoordinates();
 }
 
 /**
@@ -80,7 +80,7 @@ void Compress::sortVectorByY(vector<Coords>*(v)) {
  * Functions generate vector of Coords struct which contains covered x axis points
  */
 void Compress::generateCoveringXCoords() {
-    float distanceBetweenPoints = 1;
+    float distanceBetweenPoints = 0.5;
     float tmpCoord = this->coordinates[0].x;
     for (int i = 1; i < this->coordinates.size() ; ++i) {
         if (abs( this->coordinates[i].x - tmpCoord ) < distanceBetweenPoints) {
@@ -95,7 +95,7 @@ void Compress::generateCoveringXCoords() {
  * Functions generate vector of Coords struct which contains covered y axis points
  */
 void Compress::generateCoveringYCoords() {
-    float distanceBetweenPoints = 1;
+    float distanceBetweenPoints = 0.5;
     float tmpCoord = this->coordinates[0].y;
     for (int i = 1; i < this->coordinates.size() ; ++i) {
         if (abs( this->coordinates[i].y - tmpCoord ) < distanceBetweenPoints) {
@@ -117,8 +117,18 @@ void Compress::findCommonIndexes() {
     }
 }
 
-vector<Coords>* Compress::getCoordinates() {
-    return &this->coordinates;
+vector<Coords>* Compress::getNewCoordinates() {
+    return &this->newCoordinates;
+}
+
+void Compress::setFinalCoordinates() {
+    for (int i = 1; i < this->commonIndexes.size() - 1; ++i) {
+        this->newCoordinates.push_back(this->oldCoordinates[this->commonIndexes[i]]);
+    }
+}
+
+float Compress::roundToTwoDecimal(float val) {
+    return nearbyint(val * 100) / 100;
 }
 
 

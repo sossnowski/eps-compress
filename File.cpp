@@ -16,7 +16,7 @@ File::File(string filePath){
     this->filePath = filePath;
     string fileName = this->getFileNameFromPath(filePath);
     this->inFileName = fileName;
-    this->outFileName = fileName + "out";
+    this->outFileName = fileName + "out.eps";
 }
 
 
@@ -24,7 +24,7 @@ File::File(string filePath){
  * Read data from file and save compressed to new file
  */
 void File::processData() {
-    const int numberOfCoordsForFunctionComputing = 100;
+    const int numberOfCoordsForFunctionComputing = 3;
     const float compressionRate = 0.1;
     ifstream inputFile(this->filePath);
     float x, y;
@@ -34,13 +34,20 @@ void File::processData() {
     string dataFromFile;
     while (getline(inputFile, line)) {
         istringstream iss(line);
-        if (!(iss >> x >> y >> c)) {
-            this->saveToOutputFile(&line);
+        if (!(iss >> x >> y >> c) && !this->beginningSaved) {
+            this->beginningOfFile += line + "\n";
             this->linesSavedBeforeCompute++;
             continue;
         }
-        line += "\n";
-        dataFromFile += line;
+        this->beginningSaved = true;
+        iss.clear();
+        iss.str("");
+        iss.str(line);
+        if(!(iss >> x >> y >> c) && this->beginningSaved) {
+            this->endOfFile += line + "\n";
+            continue;
+        }
+        dataFromFile += line += "\n";
         lineCounter++;
 
         if (lineCounter == numberOfCoordsForFunctionComputing) {
@@ -49,9 +56,11 @@ void File::processData() {
             lineCounter = 0;
         }
     }
+    this->saveToOutputFile(&this->beginningOfFile);
     co.compressData(&dataFromFile);
     co.computeCoordinates();
     this->findEssentialLines(&co, this->filePath);
+    this->saveToOutputFile(&this->endOfFile);
 
 }
 
@@ -90,12 +99,13 @@ void File::saveToOutputFile(string* line) {
 
 void File::findEssentialLines(Compress *c, string filePath) {
     ifstream file(filePath);
-    vector<Coords>* v = c->getCoordinates();
+    vector<Coords>* v = c->getNewCoordinates();
     std::vector<string> tokens;
     string line, buff, newLine;
     long int lineCounter = 0, coordinatesIndexCounter = 0;
     ostringstream floatToString;
     while (getline(file, line)) {
+        if (v->size() == coordinatesIndexCounter) break;
         if (lineCounter - this->linesSavedBeforeCompute == v->at(coordinatesIndexCounter).position) {
             istringstream ss(line);
             while (ss >> buff)
@@ -105,13 +115,15 @@ void File::findEssentialLines(Compress *c, string filePath) {
             floatToString.str("");
             floatToString << v->at(coordinatesIndexCounter).y;
             tokens[1] = floatToString.str();
+            floatToString.str("");
             newLine = tokens[0];
             for (int i = 1; i < tokens.size(); ++i) {
                 newLine += " " + tokens[i];
             }
-            newLine += "\n";
-            cout << line << "a"<<endl;
-            cout << newLine <<endl;
+            this->saveToOutputFile(&newLine);
+            coordinatesIndexCounter++;
+            newLine = "";
+            tokens.clear();
         }
 
 //        this->saveToOutputFile(&line);

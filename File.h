@@ -13,10 +13,13 @@ private:
     string inFileName;
     string outFileName;
     string filePath;
+    string beginningOfFile;
+    string endOfFile;
+    bool beginningSaved;
     int linesSavedBeforeCompute;
 
 public:
-    File() : linesSavedBeforeCompute(0) {};
+    File() : linesSavedBeforeCompute(0), beginningSaved(false) {};
     File(string filePath);
     ~File() {};
     void processData();

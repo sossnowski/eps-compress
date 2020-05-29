@@ -9,9 +9,10 @@ using namespace std;
 
 class Compress {
 private:
-    vector<Coords>oldCoordinates;
+    vector<Coords>coordinates;
     vector<long int>coverXCoordinates;
     vector<long int>coverYCoordinates;
+    vector<long int>commonIndexes;
     long int numberOfCurrentLine;
     float previousX;
     float previousY;
@@ -20,8 +21,14 @@ private:
 public:
     Compress() : numberOfCurrentLine(0), previousX(0), previousY(0), previousC(""), flag(true) {};
     ~Compress() {};
+    vector<Coords>* getCoordinates();
     void compressData(string* dataToCompress);
     void computeCoordinates();
+    void sortVectorByX(vector<Coords>*v);
+    void sortVectorByY(vector<Coords>*(v));
+    void generateCoveringXCoords();
+    void generateCoveringYCoords();
+    void findCommonIndexes();
 };
 
 

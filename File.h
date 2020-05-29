@@ -1,5 +1,6 @@
 #include <string>
 #include <fstream>
+#include "Compress.h"
 
 #ifndef EPSCOMPRESS_FILE_H
 #define EPSCOMPRESS_FILE_H
@@ -12,9 +13,10 @@ private:
     string inFileName;
     string outFileName;
     string filePath;
+    int linesSavedBeforeCompute;
 
 public:
-    File() {};
+    File() : linesSavedBeforeCompute(0) {};
     File(string filePath);
     ~File() {};
     void processData();
@@ -22,6 +24,8 @@ public:
     string getInFileName();
     string getOutFileName();
     void saveToOutputFile(string* line);
+    void findEssentialLines(Compress* c, string filePath);
+    fstream& gotoLine(fstream& file, long int num);
 };
 
 

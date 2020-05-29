@@ -15,15 +15,14 @@ void Compress::compressData(string* dataToCompress) {
     string c;
     istringstream f(*dataToCompress);
     while (f >> x >> y >> c) {
-        this->numberOfCurrentLine++;
         if (c != this->previousC && this->flag) {
-            this->oldCoordinates.push_back({ x, y, this->numberOfCurrentLine});
+            this->coordinates.push_back({ x, y, this->numberOfCurrentLine++});
             this->flag = false;
         } else {
             this->flag = true;
             x += this->previousX;
             y += this->previousY;
-            this->oldCoordinates.push_back({ x, y, this->numberOfCurrentLine});
+            this->coordinates.push_back({ x, y, this->numberOfCurrentLine++});
         }
         this->previousC = c;
         this->previousX = x;
@@ -31,56 +30,95 @@ void Compress::compressData(string* dataToCompress) {
     }
 }
 
-
+/**
+ * Function finding covered coordinates
+ */
 void Compress::computeCoordinates() {
-    sort( this->oldCoordinates.begin( ), this->oldCoordinates.end( ), [ ]( const auto& lhs, const auto& rhs ){
-        return lhs.x < rhs.x;
-    });
+    this->sortVectorByX(&this->coordinates);
 
-    float tmpCoord = this->oldCoordinates[0].x;
-    for (int i = 1; i < this->oldCoordinates.size() - 1 ; ++i) {
-        if (abs( this->oldCoordinates[i].x - tmpCoord ) < 1) {
-            this->coverXCoordinates.push_back(this->oldCoordinates[i + 1].position);
-        } else {
-            tmpCoord = this->oldCoordinates[i].x;
-        }
-    }
-
-    sort( this->oldCoordinates.begin( ), this->oldCoordinates.end( ), [ ]( const auto& lhs, const auto& rhs ){
+    sort( this->coordinates.begin( ), this->coordinates.end( ), [ ]( const auto& lhs, const auto& rhs ){
         return lhs.y < rhs.y;
     });
 
-    tmpCoord = this->oldCoordinates[0].y;
-    for (int i = 1; i < this->oldCoordinates.size() - 1 ; ++i) {
-        if (abs(this->oldCoordinates[i].y - tmpCoord ) < 1) {
-            this->coverYCoordinates.push_back(this->oldCoordinates[i + 1].position);
-        } else {
-            tmpCoord = this->oldCoordinates[i].y;
-        }
-    }
-    cout << this->oldCoordinates.size() <<endl;
-    vector<long int>commonIndexes;
-    if (this->coverXCoordinates.size() > this->coverYCoordinates.size()) {
-        for (int i = 0; i < this->coverYCoordinates.size() ; ++i) {
-            if (find(this->coverXCoordinates.begin(), this->coverXCoordinates.end(), this->coverYCoordinates[i]) != this->coverXCoordinates.end()) {
-                commonIndexes.push_back(this->coverYCoordinates[i]);
-            }
-        }
-    } else {
-        for (int i = 0; i < this->coverXCoordinates.size() ; ++i) {
-            if (find(this->coverYCoordinates.begin(), this->coverYCoordinates.end(), this->coverXCoordinates[i]) != this->coverYCoordinates.end()) {
-                commonIndexes.push_back(this->coverXCoordinates[i]);
-            }
-        }
-    }
-    //wspolr`edne wyluczajac te nachodzace na siebie
-    //mam indexy tablicy do usuniecia ale jak usune jeden z nich to juz tablica sie przesuwa i indexy sie zmieniaja - rozkmin
-    cout << commonIndexes.size() <<endl;
-    for (int i = 0; i < commonIndexes.size() ; ++i) {
-        this->oldCoordinates.erase(this->oldCoordinates.begin() + commonIndexes[i] - 1 - i);
+    this->generateCoveringXCoords();
+    this->generateCoveringYCoords();
+
+    cout << this->coordinates.size() <<endl;
+    this->findCommonIndexes();
+
+    cout << this->commonIndexes.size() <<endl;
+
+    // cut common coordinates from coordinates vector
+    for (int i = 0; i < this->commonIndexes.size() ; ++i) {
+        this->coordinates.erase(this->coordinates.begin() + this->commonIndexes[i] - i);
     }
 
-    cout << this->oldCoordinates.size() <<endl;
+    cout << this->coordinates.size() <<endl;
+}
+
+/**
+ * Function sorting vector of Coords struct by key x
+ * @param v
+ */
+void Compress::sortVectorByX(vector<Coords>*(v)) {
+    sort( v->begin( ), v->end( ), [ ]( const auto& lhs, const auto& rhs ){
+        return lhs.x < rhs.x;
+    });
+}
+
+/**
+ * Function sorting vector of Coords struct by key y
+ * @param v
+ */
+void Compress::sortVectorByY(vector<Coords>*(v)) {
+    sort( v->begin( ), v->end( ), [ ]( const auto& lhs, const auto& rhs ){
+        return lhs.y < rhs.y;
+    });
+}
+
+/**
+ * Functions generate vector of Coords struct which contains covered x axis points
+ */
+void Compress::generateCoveringXCoords() {
+    float distanceBetweenPoints = 1;
+    float tmpCoord = this->coordinates[0].x;
+    for (int i = 1; i < this->coordinates.size() ; ++i) {
+        if (abs( this->coordinates[i].x - tmpCoord ) < distanceBetweenPoints) {
+            this->coverXCoordinates.push_back(i);
+        } else {
+            tmpCoord = this->coordinates[i].x;
+        }
+    }
+}
+
+/**
+ * Functions generate vector of Coords struct which contains covered y axis points
+ */
+void Compress::generateCoveringYCoords() {
+    float distanceBetweenPoints = 1;
+    float tmpCoord = this->coordinates[0].y;
+    for (int i = 1; i < this->coordinates.size() ; ++i) {
+        if (abs( this->coordinates[i].y - tmpCoord ) < distanceBetweenPoints) {
+            this->coverYCoordinates.push_back(i);
+        } else {
+            tmpCoord = this->coordinates[i].y;
+        }
+    }
+}
+
+/**
+ * Function finding points which have x and y axis covered
+ */
+void Compress::findCommonIndexes() {
+    for (int i = 0; i < this->coverYCoordinates.size() ; ++i) {
+        if (find(this->coverXCoordinates.begin(), this->coverXCoordinates.end(), this->coverYCoordinates[i]) != this->coverXCoordinates.end()) {
+            this->commonIndexes.push_back(this->coverYCoordinates[i]);
+        }
+    }
+}
+
+vector<Coords>* Compress::getCoordinates() {
+    return &this->coordinates;
 }
 
 

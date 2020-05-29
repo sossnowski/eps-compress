@@ -16,10 +16,11 @@ private:
     string beginningOfFile;
     string endOfFile;
     bool beginningSaved;
+    bool saveFlag;
     int linesSavedBeforeCompute;
 
 public:
-    File() : linesSavedBeforeCompute(0), beginningSaved(false) {};
+    File() : linesSavedBeforeCompute(0), beginningSaved(false), saveFlag(true) {};
     File(string filePath);
     ~File() {};
     void processData();

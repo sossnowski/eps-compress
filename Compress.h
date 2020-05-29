@@ -33,6 +33,7 @@ public:
     void findCommonIndexes();
     void setFinalCoordinates();
     float roundToTwoDecimal(float val);
+    Coords getAbsoluteCoords(long int index);
 };
 
 

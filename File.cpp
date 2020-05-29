@@ -101,26 +101,41 @@ void File::findEssentialLines(Compress *c, string filePath) {
     ifstream file(filePath);
     vector<Coords>* v = c->getNewCoordinates();
     std::vector<string> tokens;
-    string line, buff, newLine;
+    string line, buff, newLine, previousStringPartOfLine;
     long int lineCounter = 0, coordinatesIndexCounter = 0;
     ostringstream floatToString;
+    this->saveFlag = true;
     while (getline(file, line)) {
         if (v->size() == coordinatesIndexCounter) break;
         if (lineCounter - this->linesSavedBeforeCompute == v->at(coordinatesIndexCounter).position) {
             istringstream ss(line);
             while (ss >> buff)
                 tokens.push_back(buff);
-            floatToString << v->at(coordinatesIndexCounter).x;
-            tokens[0] = floatToString.str();
-            floatToString.str("");
-            floatToString << v->at(coordinatesIndexCounter).y;
-            tokens[1] = floatToString.str();
-            floatToString.str("");
+
+            if (previousStringPartOfLine != tokens[2] && this->saveFlag) {
+                Coords tmp = c->getAbsoluteCoords(coordinatesIndexCounter);
+                floatToString << tmp.x;
+                tokens[0] = floatToString.str();
+                floatToString.str("");
+                floatToString << tmp.y;
+                tokens[1] = floatToString.str();
+                floatToString.str("");
+                this->saveFlag = false;
+            } else {
+                this->saveFlag = true;
+                floatToString << v->at(coordinatesIndexCounter).x;
+                tokens[0] = floatToString.str();
+                floatToString.str("");
+                floatToString << v->at(coordinatesIndexCounter).y;
+                tokens[1] = floatToString.str();
+                floatToString.str("");
+            }
             newLine = tokens[0];
             for (int i = 1; i < tokens.size(); ++i) {
                 newLine += " " + tokens[i];
             }
             this->saveToOutputFile(&newLine);
+            previousStringPartOfLine = tokens[2];
             coordinatesIndexCounter++;
             newLine = "";
             tokens.clear();
@@ -133,12 +148,4 @@ void File::findEssentialLines(Compress *c, string filePath) {
         lineCounter++;
     }
 
-}
-
-fstream& gotoLine(fstream& file, long int num){
-    file.seekg(ios::beg);
-    for(int i=0; i < num - 1; ++i){
-        file.ignore(numeric_limits<streamsize>::max(),'\n');
-    }
-    return file;
 }

@@ -3,6 +3,11 @@
 #include <algorithm>
 #include <cmath>
 
+// trzeba przepisyac wszystkie spolrzedne na bezwzgledne wtedy trzeba wziac tylko te odpowiednio od siebie oddalone, a nastepnie przerobic je na wzgldne.
+// bo jak wezme oryginalne na indeksach z wartosci bezwzglednych to po prostu biore tylko 200 z 2000 a wiec finalnie rysunek jest znacznie krotszy mimo ze te wartosci
+// sa bardzo male, trzeva z bezwzglednych wydzielic wzgledne na zasadzie ze oblicze po prostu aktulna - poprzednia i mam wartosc bezwzgledna jaka trzeba dodac.
+// pozostaje rozkminic tylko jak radzic sibie z tym ze niektopre sa bezwzgledne a wiec napis sie rozni
+
 using namespace std;
 
 /**
@@ -47,13 +52,11 @@ void Compress::computeCoordinates() {
     cout << this->commonIndexes.size() <<endl;
 
     // cut common coordinates from coordinates vector
-    this->newCoordinates = this->oldCoordinates;
     for (int i = 0; i < this->commonIndexes.size() ; ++i) {
-        this->newCoordinates.erase(this->newCoordinates.begin() + this->commonIndexes[i] - i);
+        this->coordinates.erase(this->coordinates.begin() + this->commonIndexes[i] - i);
     }
 
-    cout << this->oldCoordinates.size() <<endl;
-    //this->setFinalCoordinates();
+    this->setFinalCoordinates();
 }
 
 /**
@@ -122,13 +125,28 @@ vector<Coords>* Compress::getNewCoordinates() {
 }
 
 void Compress::setFinalCoordinates() {
-    for (int i = 1; i < this->commonIndexes.size() - 1; ++i) {
-        this->newCoordinates.push_back(this->oldCoordinates[this->commonIndexes[i]]);
+    this->newCoordinates.push_back(this->coordinates[0]);
+    for (int i = 1; i < this->coordinates.size(); ++i) {
+        this->newCoordinates.push_back({
+           this->coordinates[i].x - this->coordinates[i - 1].x,
+           this->coordinates[i].y - this->coordinates[i - 1].y,
+           this->coordinates[i].position
+        });
     }
 }
 
 float Compress::roundToTwoDecimal(float val) {
     return nearbyint(val * 100) / 100;
+}
+
+Coords Compress::getAbsoluteCoords(long int index) {
+    Coords c;
+    c.x = 0, c.y = 0;
+    for (int i = 0; i <= index; ++i) {
+        c.x += this->newCoordinates[i].x;
+        c.y += this->newCoordinates[i].y;
+    }
+    return c;
 }
 
 

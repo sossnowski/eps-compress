@@ -20,12 +20,13 @@ private:
     float previousY;
     string previousC;
     bool flag;
+    float distanceBetweenPoints;
 public:
-    Compress() : numberOfCurrentLine(0), previousX(0), previousY(0), previousC(""), flag(true) {};
+    Compress() : numberOfCurrentLine(0), previousX(0), previousY(0), previousC(""), flag(true), distanceBetweenPoints(1) {};
     ~Compress() {};
     vector<Coords>* getNewCoordinates();
-    void compressData(string* dataToCompress);
-    void computeCoordinates();
+    void getCoordinatesFromFileData(string* dataToCompress);
+    void findCoverCoordinates();
     void sortVectorByX(vector<Coords>*v);
     void sortVectorByY(vector<Coords>*(v));
     void generateCoveringXCoords();

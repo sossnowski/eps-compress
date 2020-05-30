@@ -4,7 +4,6 @@
 #include <vector>
 #include "File.h"
 #include "Compress.h"
-#include <limits>
 
 using namespace std;
 
@@ -34,31 +33,37 @@ void File::processData() {
     string dataFromFile;
     while (getline(inputFile, line)) {
         istringstream iss(line);
+
+        // Check if coordinates are on the beginning of line
         if (!(iss >> x >> y >> c) && !this->beginningSaved) {
             this->beginningOfFile += line + "\n";
             this->linesSavedBeforeCompute++;
             continue;
         }
+
         this->beginningSaved = true;
         iss.clear();
         iss.str("");
         iss.str(line);
+
         if(!(iss >> x >> y >> c) && this->beginningSaved) {
             this->endOfFile += line + "\n";
             continue;
         }
+
         dataFromFile += line += "\n";
         lineCounter++;
 
         if (lineCounter == numberOfCoordsForFunctionComputing) {
-            co.compressData(&dataFromFile);
+            co.getCoordinatesFromFileData(&dataFromFile);
             dataFromFile = "";
             lineCounter = 0;
         }
     }
+
     this->saveToOutputFile(&this->beginningOfFile);
-    co.compressData(&dataFromFile);
-    co.computeCoordinates();
+    co.getCoordinatesFromFileData(&dataFromFile);
+    co.findCoverCoordinates();
     this->findEssentialLines(&co, this->filePath);
     this->saveToOutputFile(&this->endOfFile);
 
@@ -91,12 +96,20 @@ string File::getOutFileName() {
     return this->outFileName;
 }
 
+/*
+ * Function saves line to output file
+ */
 void File::saveToOutputFile(string* line) {
     ofstream outputFile(this->outFileName, ios_base::app | ios_base::out);
     *line += "\n";
     outputFile << *line;
 }
 
+/**
+ * Function prepare final lines with coordinates to save to output file
+ * @param c
+ * @param filePath
+ */
 void File::findEssentialLines(Compress *c, string filePath) {
     ifstream file(filePath);
     vector<Coords>* v = c->getNewCoordinates();
@@ -105,13 +118,16 @@ void File::findEssentialLines(Compress *c, string filePath) {
     long int lineCounter = 0, coordinatesIndexCounter = 0;
     ostringstream floatToString;
     this->saveFlag = true;
+
     while (getline(file, line)) {
         if (v->size() == coordinatesIndexCounter) break;
+        // Beggining of file was saved earlier so skip this lines
         if (lineCounter - this->linesSavedBeforeCompute == v->at(coordinatesIndexCounter).position) {
             istringstream ss(line);
             while (ss >> buff)
                 tokens.push_back(buff);
 
+            // To check if coordinates in this line inside old file were relative or absolute
             if (previousStringPartOfLine != tokens[2] && this->saveFlag) {
                 Coords tmp = c->getAbsoluteCoords(coordinatesIndexCounter);
                 floatToString << tmp.x;
@@ -140,11 +156,6 @@ void File::findEssentialLines(Compress *c, string filePath) {
             newLine = "";
             tokens.clear();
         }
-
-//        this->saveToOutputFile(&line);
-//        continue;
-
-
         lineCounter++;
     }
 

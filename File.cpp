@@ -23,7 +23,7 @@ File::File(string filePath){
  * Read data from file and save compressed to new file
  */
 void File::processData() {
-    const int numberOfCoordsForFunctionComputing = 3;
+    const int numberOfCoordsForFunctionComputing = 100;
     const float compressionRate = 0.1;
     ifstream inputFile(this->filePath);
     float x, y;
@@ -33,9 +33,8 @@ void File::processData() {
     string dataFromFile;
     while (getline(inputFile, line)) {
         istringstream iss(line);
-
         // Check if coordinates are on the beginning of line
-        if (!(iss >> x >> y >> c) && !this->beginningSaved) {
+        if ((!(iss >> x >> y >> c) || line[0] == ' ') && !this->beginningSaved) {
             this->beginningOfFile += line + "\n";
             this->linesSavedBeforeCompute++;
             continue;
@@ -128,7 +127,7 @@ void File::findEssentialLines(Compress *c, string filePath) {
                 tokens.push_back(buff);
 
             // To check if coordinates in this line inside old file were relative or absolute
-            if (previousStringPartOfLine != tokens[2] && this->saveFlag) {
+            if (previousStringPartOfLine != tokens[2] && !c->getAbsoluteCoordinatesFlag() && this->saveFlag) {
                 Coords tmp = c->getAbsoluteCoords(coordinatesIndexCounter);
                 floatToString << tmp.x;
                 tokens[0] = floatToString.str();

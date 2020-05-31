@@ -2,13 +2,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cmath>
-
-// trzeba przepisyac wszystkie spolrzedne na bezwzgledne wtedy trzeba wziac tylko te odpowiednio od siebie oddalone, a nastepnie przerobic je na wzgldne.
-// bo jak wezme oryginalne na indeksach z wartosci bezwzglednych to po prostu biore tylko 200 z 2000 a wiec finalnie rysunek jest znacznie krotszy mimo ze te wartosci
-// sa bardzo male, trzeva z bezwzglednych wydzielic wzgledne na zasadzie ze oblicze po prostu aktulna - poprzednia i mam wartosc bezwzgledna jaka trzeba dodac.
-// pozostaje rozkminic tylko jak radzic sibie z tym ze niektopre sa bezwzgledne a wiec napis sie rozni ||||chyba juz
-
-// zaokraghlic cyfry w pliku
+//#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -19,19 +13,26 @@ using namespace std;
  */
 void Compress::getCoordinatesFromFileData(string* dataToCompress) {
     float x,y;
-    string c;
+    string line, c;
     istringstream f(*dataToCompress);
-    while (f >> x >> y >> c) {
+    while (getline(f, line)) {
+        istringstream iss(line);
+        iss >> x >> y >> c;
         this->oldCoordinates.push_back({ x, y, this->numberOfCurrentLine});
+
         // Check if coordinates are given as relative or absolute and add to vector
         if (c != this->previousC && this->flag) {
             this->coordinates.push_back({ x, y, this->numberOfCurrentLine++});
             this->flag = false;
+        } else if (c == this->previousC && !this->flag) {
+            this->coordinates.push_back({ x, y, this->numberOfCurrentLine++});
+            this->absoluteCoordinates = true;
         } else {
             this->flag = true;
             x += this->previousX;
             y += this->previousY;
             this->coordinates.push_back({ x, y, this->numberOfCurrentLine++});
+            this->absoluteCoordinates = false;
         }
         this->previousC = c;
         this->previousX = x;
@@ -52,13 +53,21 @@ void Compress::findCoverCoordinates() {
     this->generateCoveringYCoords();
 
     this->findCommonIndexes();
+    cout << this->coordinates.size() << " " << this->commonIndexes.size() <<endl;
 
     // Cut common coordinates from coordinates vector
     for (int i = 0; i < this->commonIndexes.size() ; ++i) {
         this->coordinates.erase(this->coordinates.begin() + this->commonIndexes[i] - i);
     }
 
-    this->setFinalCoordinates();
+    if (!this->absoluteCoordinates) {
+        this->setFinalCoordinates();
+    } else {
+        this->newCoordinates = this->coordinates;
+        this->sortVectorByPosition(&this->newCoordinates);
+    }
+
+    cout << this->newCoordinates.size() << endl;
 }
 
 /**
@@ -78,6 +87,16 @@ void Compress::sortVectorByX(vector<Coords>*(v)) {
 void Compress::sortVectorByY(vector<Coords>*(v)) {
     sort( v->begin( ), v->end( ), [ ]( const auto& lhs, const auto& rhs ){
         return lhs.y < rhs.y;
+    });
+}
+
+/**
+ * Function sorting vector of Coords struct by key y
+ * @param v
+ */
+void Compress::sortVectorByPosition(vector<Coords>*(v)) {
+    sort( v->begin( ), v->end( ), [ ]( const auto& lhs, const auto& rhs ){
+        return lhs.position < rhs.position;
     });
 }
 
@@ -130,6 +149,15 @@ vector<Coords>* Compress::getNewCoordinates() {
 }
 
 /**
+ * Get absolute coordinates flag
+ *
+ * @return this->absoluteCoordinates
+ */
+bool Compress::getAbsoluteCoordinatesFlag() {
+    return this->absoluteCoordinates;
+}
+
+/**
  * Set coords as relative again
  */
 void Compress::setFinalCoordinates() {
@@ -167,6 +195,11 @@ Coords Compress::getAbsoluteCoords(long int index) {
         c.y += this->newCoordinates[i].y;
     }
     return c;
+}
+
+float Compress::distance(int x1, int y1, int x2, int y2) {
+    return sqrt(pow(x2 - x1, 2) +
+                pow(y2 - y1, 2) * 1.0);
 }
 
 

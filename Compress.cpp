@@ -2,7 +2,6 @@
 #include <sstream>
 #include <algorithm>
 #include <cmath>
-//#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -46,18 +45,14 @@ void Compress::getCoordinatesFromFileData(string* dataToCompress) {
 void Compress::findCoverCoordinates() {
     // Sort and choose cover x coordinates
     this->sortVectorByX(&this->coordinates);
-    this->generateCoveringXCoords();
+    this->generateCoveringCoords();
 
-    // Sort and choose cover y coordinates
-    this->sortVectorByY(&this->coordinates);
-    this->generateCoveringYCoords();
-
-    this->findCommonIndexes();
-    cout << this->coordinates.size() << " " << this->commonIndexes.size() <<endl;
+    cout << this->coordinates.size() << " " << this->coverCoordinates.size() <<endl;
+    this->sortVectorByPosition(&this->coverCoordinates);
 
     // Cut common coordinates from coordinates vector
-    for (int i = 0; i < this->commonIndexes.size() ; ++i) {
-        this->coordinates.erase(this->coordinates.begin() + this->commonIndexes[i] - i);
+    for (int i = 0; i < this->coverCoordinates.size() ; ++i) {
+        this->coordinates.erase(this->coordinates.begin() + this->coverCoordinates[i].position - i);
     }
 
     if (!this->absoluteCoordinates) {
@@ -103,40 +98,24 @@ void Compress::sortVectorByPosition(vector<Coords>*(v)) {
 /**
  * Functions generate vector of Coords struct which contains covered x axis points
  */
-void Compress::generateCoveringXCoords() {
-    float tmpCoord = this->coordinates[0].x;
+void Compress::generateCoveringCoords() {
+    Coords tmpCoords = this->coordinates[0];
+    vector<Coords>x, v;
     for (int i = 1; i < this->coordinates.size() ; ++i) {
-        if (abs( this->coordinates[i].x - tmpCoord ) < this->distanceBetweenPoints) {
-            this->coverXCoordinates.push_back(i);
-        } else {
-            tmpCoord = this->coordinates[i].x;
+        int j = 0;
+        while (this->coordinates[i + j].x - tmpCoords.x <= this->distanceBetweenPoints) {
+            if (i + j >= this->coordinates.size()) break;
+            x.push_back(this->coordinates[i + j]);
+            i++;
         }
+        if (x.size()) {
+            v = this->findCoverYCoordinates(&x, tmpCoords);
+            this->coverCoordinates.insert(this->coverCoordinates.end(), v.begin(), v.end());
+            x.clear();
+        }
+        tmpCoords = this->coordinates[i];
     }
-}
 
-/**
- * Functions generate vector of Coords struct which contains covered y axis points
- */
-void Compress::generateCoveringYCoords() {
-    float tmpCoord = this->coordinates[0].y;
-    for (int i = 1; i < this->coordinates.size() ; ++i) {
-        if (abs( this->coordinates[i].y - tmpCoord ) < this->distanceBetweenPoints) {
-            this->coverYCoordinates.push_back(i);
-        } else {
-            tmpCoord = this->coordinates[i].y;
-        }
-    }
-}
-
-/**
- * Function finding points which have x and y axis covered
- */
-void Compress::findCommonIndexes() {
-    for (int i = 0; i < this->coverYCoordinates.size() ; ++i) {
-        if (find(this->coverXCoordinates.begin(), this->coverXCoordinates.end(), this->coverYCoordinates[i]) != this->coverXCoordinates.end()) {
-            this->commonIndexes.push_back(this->coverYCoordinates[i]);
-        }
-    }
 }
 
 /**
@@ -197,9 +176,17 @@ Coords Compress::getAbsoluteCoords(long int index) {
     return c;
 }
 
-float Compress::distance(int x1, int y1, int x2, int y2) {
-    return sqrt(pow(x2 - x1, 2) +
-                pow(y2 - y1, 2) * 1.0);
+vector<Coords> Compress::findCoverYCoordinates(vector<Coords>* v, Coords refPoint) {
+    vector<Coords>coords;
+    this->sortVectorByY(v);
+    for (int i = 0; i < v->size() ; ++i) {
+        if (v->at(i).y - refPoint.y <= this->distanceBetweenPoints) {
+            coords.push_back(v->at(i));
+        } else {
+            break;
+        }
+    }
+    return coords;
 }
 
 

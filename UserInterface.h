@@ -6,6 +6,8 @@ using namespace std;
 
 
 class UserInterface {
+    bool filePathTyped;
+    bool widthTyped;
 public:
     UserInterface() {};
     ~UserInterface() {};

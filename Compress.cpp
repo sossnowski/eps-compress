@@ -43,16 +43,16 @@ void Compress::getCoordinatesFromFileData(string* dataToCompress) {
  * Function find covered coordinates
  */
 void Compress::findCoverCoordinates() {
-    // Sort and choose cover x coordinates
-    this->sortVectorByX(&this->coordinates);
-    float u = this->coordinates[this->coordinates.size()-1].x;
 
+    this->sortVectorByX(&this->coordinates);
+
+    // Resize coordinates to output image size
     if (this->width) this->scaleImage();
-    u = this->coordinates[this->coordinates.size()-1].x;
 
     this->generateCoveringCoords();
 
-    cout << this->coordinates.size() << " " << this->coverCoordinates.size() <<endl;
+    cout << "Usunięto " << this->coverCoordinates.size() << " z " << this->coordinates.size() << " punktów" <<endl;
+
     this->sortVectorByPosition(&this->coverCoordinates);
     this->sortVectorByPosition(&this->coordinates);
 
@@ -61,14 +61,12 @@ void Compress::findCoverCoordinates() {
         this->coordinates.erase(this->coordinates.begin() + this->coverCoordinates[i].position - i);
     }
 
+    // If coordinates were relative extract it from absolute
     if (!this->absoluteCoordinates) {
         this->setFinalCoordinates();
     } else {
         this->newCoordinates = this->coordinates;
-        this->sortVectorByPosition(&this->newCoordinates);
     }
-
-    cout << this->newCoordinates.size() << endl;
 }
 
 /**
@@ -105,12 +103,14 @@ void Compress::sortVectorByPosition(vector<Coords>*(v)) {
  * Functions generate vector of Coords struct which contains covered x axis points
  */
 void Compress::generateCoveringCoords() {
-    Coords tmpCoords;// = this->coordinates[0];
+    Coords tmpCoords;
     vector<Coords>x, v;
     int j = 0;
     for (int i = 0; i < this->coordinates.size() - 1 ; ++i) {
+        // Check if this coordinate was not added to cover array before
         if (find(this->coverCoordinates.begin(), this->coverCoordinates.end(), this->coordinates[i]) != this->coverCoordinates.end()) continue;
         tmpCoords = this->coordinates[i];
+        // Get all coordinates which are not further than this->distanceBetweenPoints(default 1) from reference coords in this iteration
         while (this->coordinates[i + 1 + j].x - tmpCoords.x <= this->distanceBetweenPoints) {
             if (i + 1 + j >= this->coordinates.size()) break;
             x.push_back(this->coordinates[i + 1 + j]);
@@ -188,6 +188,7 @@ vector<Coords> Compress::findCoverYCoordinates(vector<Coords> v, Coords refPoint
     vector<Coords>coords;
     this->sortVectorByY(&v);
     for (int i = 0; i < v.size() ; ++i) {
+        // If y distance is also less than 1 from reference axis add this point to cover array
         if (abs(v[i].y - refPoint.y) <= this->distanceBetweenPoints) {
             if (find(this->coverCoordinates.begin(), this->coverCoordinates.end(), v[i]) != this->coverCoordinates.end() != true) coords.push_back(v[i]);
         }
@@ -195,14 +196,27 @@ vector<Coords> Compress::findCoverYCoordinates(vector<Coords> v, Coords refPoint
     return coords;
 }
 
+/**
+ * Comparison operator for Coords structure
+ *
+ * @param rhs
+ * @param lhs
+ * @return
+ */
 bool operator==(const Coords& rhs, const Coords& lhs) {
     return rhs.position == lhs.position;
 }
 
+/*
+ * Set image width
+ */
 void Compress::setImageDimension(int width) {
     this->width = width;
 }
 
+/**
+ * Scale all coordinates of image
+ */
 void Compress::scaleImage() {
     for (int i = 0; i < this->coordinates.size() ; ++i) {
         this->coordinates[i].x *= this->width / this->originalWidth;
@@ -210,14 +224,18 @@ void Compress::scaleImage() {
     }
 }
 
+/**
+ * Set original image width
+ * @param width
+ */
 void Compress::setOriginalImageWidth(int width) {
     this->originalWidth = width;
 }
 
-void Compress::setScale() {
-
-}
-
+/**
+ * Get scale to resize
+ * @return scale
+ */
 float Compress::getScale() {
     return this->width / this->originalWidth;
 }

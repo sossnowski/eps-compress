@@ -13,9 +13,8 @@ using namespace std;
  */
 File::File(string filePath){
     this->filePath = filePath;
-    string fileName = this->getFileNameFromPath(filePath);
-    this->inFileName = fileName;
-    this->outFileName = fileName + "out.eps";
+    this->outFileName = this->getFileNameFromPath(filePath);
+    this->linesSavedBeforeCompute = 0;
 }
 
 
@@ -25,6 +24,7 @@ File::File(string filePath){
 void File::processData(int width = 0) {
     const int numberOfCoordsForFunctionComputing = 100;
     ifstream inputFile(this->filePath);
+    if (inputFile.fail()) throw ios_base::failure("Nie udało się otworzyć pliku podaj poprawną scieżkę.");
     float x, y;
     int originalImageWidth, originalImageHeight;
     string line, c, buff, newLine, w1, w2;
@@ -34,11 +34,12 @@ void File::processData(int width = 0) {
     string dataFromFile;
     while (getline(inputFile, line)) {
         istringstream iss(line);
-        // Check if coordinates are on the beginning of line
+        // Check if coordinates are on the beginning of line if not it is a header
         if ((!(iss >> x >> y >> c) || line[0] == ' ') && !this->beginningSaved) {
             iss.clear();
             iss.str(line);
             iss >> c >> w1 >> w2 >> originalImageWidth >> originalImageHeight;
+            // Get original file dimensions and scale them
             if (c == "%%BoundingBox:") {
                 co.setOriginalImageWidth(originalImageWidth);
                 float u = co.getScale();
@@ -62,6 +63,7 @@ void File::processData(int width = 0) {
         iss.str("");
         iss.str(line);
 
+        // Check if footer of file did not start, if so get this line
         if(!(iss >> x >> y >> c) && this->beginningSaved) {
             this->endOfFile += line + "\n";
             continue;
@@ -70,6 +72,7 @@ void File::processData(int width = 0) {
         dataFromFile += line += "\n";
         lineCounter++;
 
+        // Get chunk of input file data and save coordinates from it
         if (lineCounter == numberOfCoordsForFunctionComputing) {
             co.getCoordinatesFromFileData(&dataFromFile);
             dataFromFile = "";
@@ -78,8 +81,11 @@ void File::processData(int width = 0) {
     }
 
     this->saveToOutputFile(&this->beginningOfFile);
+    cout << "Przetworzono nagłówki pliku." <<endl;
+    cout << "Rozpoczynam analizę i kompresję pliku..."<<endl;
     co.getCoordinatesFromFileData(&dataFromFile);
     co.findCoverCoordinates();
+    cout << "Kompresja zakończona. Zapisuję..."<<endl;
     this->findEssentialLines(&co, this->filePath);
     this->saveToOutputFile(&this->endOfFile);
 
@@ -91,9 +97,11 @@ void File::processData(int width = 0) {
  * @return
  */
 string File::getFileNameFromPath(string filePath) {
-    string fileName;
-
-    return fileName;
+    for (int i = 0; i < 4 ; ++i) {
+        filePath.erase(filePath.end() - 1);
+    }
+    filePath += "_out.eps";
+    return filePath;
 }
 
 /**
@@ -117,6 +125,7 @@ string File::getOutFileName() {
  */
 void File::saveToOutputFile(string* line) {
     ofstream outputFile(this->outFileName, ios_base::app | ios_base::out);
+    if (outputFile.fail()) throw ios_base::failure("Nie udało się otworzyć pliku wynikowego");
     *line += "\n";
     outputFile << *line;
 }
@@ -128,6 +137,7 @@ void File::saveToOutputFile(string* line) {
  */
 void File::findEssentialLines(Compress *c, string filePath) {
     ifstream file(filePath);
+    if (file.fail()) throw ios_base::failure("Nie udało się otworzyć pliku podaj poprawną scieżkę.");
     vector<Coords>* v = c->getNewCoordinates();
     std::vector<string> tokens;
     string line, buff, newLine, previousStringPartOfLine;
@@ -137,7 +147,8 @@ void File::findEssentialLines(Compress *c, string filePath) {
 
     while (getline(file, line)) {
         if (v->size() == coordinatesIndexCounter) break;
-        // Beggining of file was saved earlier so skip this lines
+
+        // Beginning of file was saved earlier so skip this lines
         if (lineCounter - this->linesSavedBeforeCompute == v->at(coordinatesIndexCounter).position) {
             istringstream ss(line);
             while (ss >> buff)

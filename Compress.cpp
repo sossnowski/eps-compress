@@ -49,11 +49,26 @@ void Compress::findCoverCoordinates() {
 
     cout << this->coordinates.size() << " " << this->coverCoordinates.size() <<endl;
     this->sortVectorByPosition(&this->coverCoordinates);
+    this->sortVectorByPosition(&this->coordinates);
 
     // Cut common coordinates from coordinates vector
     for (int i = 0; i < this->coverCoordinates.size() ; ++i) {
         this->coordinates.erase(this->coordinates.begin() + this->coverCoordinates[i].position - i);
     }
+
+//    vector<Coords>final;
+//    int j = 0;
+//    for (int i = 0; i < this->coordinates.size() ; ++i) {
+//        if (this->coordinates[i].position != this->coverCoordinates[j].position) {
+//            final.push_back(this->coordinates[i]);
+//        } else {
+//            j++;
+//        }
+//    }
+//    cout << final.size()<<endl;
+//    this->newCoordinates = final;
+
+
 
     if (!this->absoluteCoordinates) {
         this->setFinalCoordinates();
@@ -99,21 +114,23 @@ void Compress::sortVectorByPosition(vector<Coords>*(v)) {
  * Functions generate vector of Coords struct which contains covered x axis points
  */
 void Compress::generateCoveringCoords() {
-    Coords tmpCoords = this->coordinates[0];
+    Coords tmpCoords;// = this->coordinates[0];
     vector<Coords>x, v;
-    for (int i = 1; i < this->coordinates.size() ; ++i) {
-        int j = 0;
-        while (this->coordinates[i + j].x - tmpCoords.x <= this->distanceBetweenPoints) {
-            if (i + j >= this->coordinates.size()) break;
-            x.push_back(this->coordinates[i + j]);
-            i++;
+    int j = 0;
+    for (int i = 0; i < this->coordinates.size() - 1 ; ++i) {
+        if (find(this->coverCoordinates.begin(), this->coverCoordinates.end(), this->coordinates[i]) != this->coverCoordinates.end()) continue;
+        tmpCoords = this->coordinates[i];
+        while (this->coordinates[i + 1 + j].x - tmpCoords.x <= this->distanceBetweenPoints) {
+            if (i + 1 + j >= this->coordinates.size()) break;
+            x.push_back(this->coordinates[i + 1 + j]);
+            j++;
         }
         if (x.size()) {
-            v = this->findCoverYCoordinates(&x, tmpCoords);
+            v = this->findCoverYCoordinates(x, tmpCoords);
             this->coverCoordinates.insert(this->coverCoordinates.end(), v.begin(), v.end());
             x.clear();
         }
-        tmpCoords = this->coordinates[i];
+        j = 0;
     }
 
 }
@@ -176,17 +193,19 @@ Coords Compress::getAbsoluteCoords(long int index) {
     return c;
 }
 
-vector<Coords> Compress::findCoverYCoordinates(vector<Coords>* v, Coords refPoint) {
+vector<Coords> Compress::findCoverYCoordinates(vector<Coords> v, Coords refPoint) {
     vector<Coords>coords;
-    this->sortVectorByY(v);
-    for (int i = 0; i < v->size() ; ++i) {
-        if (v->at(i).y - refPoint.y <= this->distanceBetweenPoints) {
-            coords.push_back(v->at(i));
-        } else {
-            break;
+    this->sortVectorByY(&v);
+    for (int i = 0; i < v.size() ; ++i) {
+        if (abs(v[i].y - refPoint.y) <= this->distanceBetweenPoints) {
+            if (find(this->coverCoordinates.begin(), this->coverCoordinates.end(), v[i]) != this->coverCoordinates.end() != true) coords.push_back(v[i]);
         }
     }
     return coords;
+}
+
+bool operator==(const Coords& rhs, const Coords& lhs) {
+    return rhs.position == lhs.position;
 }
 
 

@@ -24,7 +24,7 @@ private:
     bool absoluteCoordinates;
     float distanceBetweenPoints;
 public:
-    Compress() : numberOfCurrentLine(0), previousX(0), previousY(0), previousC(""), flag(true), distanceBetweenPoints(2), absoluteCoordinates(false) {};
+    Compress() : numberOfCurrentLine(0), previousX(0), previousY(0), previousC(""), flag(true), distanceBetweenPoints(1), absoluteCoordinates(false) {};
     ~Compress() {};
     vector<Coords>* getNewCoordinates();
     bool getAbsoluteCoordinatesFlag();
@@ -36,7 +36,7 @@ public:
     void generateCoveringCoords();
     void generateCoveringYCoords();
     void findCommonIndexes();
-    vector<Coords> findCoverYCoordinates(vector<Coords>* v, Coords referencePoint);
+    vector<Coords> findCoverYCoordinates(vector<Coords> v, Coords referencePoint);
     void setFinalCoordinates();
     float roundToTwoDecimal(float val);
     Coords getAbsoluteCoords(long int index);

@@ -7,9 +7,9 @@
  * Handle file and start compress
  * @param filePath
  */
-void UserInterface::handleFile(string filePath) {
+void UserInterface::handleFile(string filePath, int width) {
     File f = File(filePath);
-    f.processData();
+    f.processData(width);
 }
 
 /**

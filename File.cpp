@@ -22,19 +22,36 @@ File::File(string filePath){
 /**
  * Read data from file and save compressed to new file
  */
-void File::processData() {
+void File::processData(int width = 0) {
     const int numberOfCoordsForFunctionComputing = 100;
-    const float compressionRate = 0.1;
     ifstream inputFile(this->filePath);
     float x, y;
-    string line, c;
+    int originalImageWidth, originalImageHeight;
+    string line, c, buff, newLine, w1, w2;
     int lineCounter = 0;
     Compress co = Compress();
+    co.setImageDimension(width);
     string dataFromFile;
     while (getline(inputFile, line)) {
         istringstream iss(line);
         // Check if coordinates are on the beginning of line
         if ((!(iss >> x >> y >> c) || line[0] == ' ') && !this->beginningSaved) {
+            iss.clear();
+            iss.str(line);
+            iss >> c >> w1 >> w2 >> originalImageWidth >> originalImageHeight;
+            if (c == "%%BoundingBox:") {
+                co.setOriginalImageWidth(originalImageWidth);
+                float u = co.getScale();
+                originalImageWidth = originalImageWidth * co.getScale();
+                originalImageHeight = originalImageHeight * co.getScale();
+                ostringstream intToString;
+                intToString << originalImageWidth;
+                newLine = c + " " + w1 + " " + w2 + " " + intToString.str() + " ";
+                intToString.str("");
+                intToString << originalImageHeight;
+                newLine += intToString.str();
+                line = newLine;
+            }
             this->beginningOfFile += line + "\n";
             this->linesSavedBeforeCompute++;
             continue;

@@ -23,13 +23,12 @@ public:
     File() : linesSavedBeforeCompute(0), beginningSaved(false), saveFlag(true) {};
     File(string filePath);
     ~File() {};
-    void processData();
+    void processData(int width);
     string getFileNameFromPath(string filePath);
     string getInFileName();
     string getOutFileName();
     void saveToOutputFile(string* line);
     void findEssentialLines(Compress* c, string filePath);
-    fstream& gotoLine(fstream& file, long int num);
 };
 
 

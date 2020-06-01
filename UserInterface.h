@@ -10,7 +10,7 @@ public:
     UserInterface() {};
     ~UserInterface() {};
     void displayInterface();
-    void handleFile(string filePath);
+    void handleFile(string filePath, int width);
 };
 
 

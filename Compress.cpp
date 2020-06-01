@@ -45,6 +45,11 @@ void Compress::getCoordinatesFromFileData(string* dataToCompress) {
 void Compress::findCoverCoordinates() {
     // Sort and choose cover x coordinates
     this->sortVectorByX(&this->coordinates);
+    float u = this->coordinates[this->coordinates.size()-1].x;
+
+    if (this->width) this->scaleImage();
+    u = this->coordinates[this->coordinates.size()-1].x;
+
     this->generateCoveringCoords();
 
     cout << this->coordinates.size() << " " << this->coverCoordinates.size() <<endl;
@@ -55,20 +60,6 @@ void Compress::findCoverCoordinates() {
     for (int i = 0; i < this->coverCoordinates.size() ; ++i) {
         this->coordinates.erase(this->coordinates.begin() + this->coverCoordinates[i].position - i);
     }
-
-//    vector<Coords>final;
-//    int j = 0;
-//    for (int i = 0; i < this->coordinates.size() ; ++i) {
-//        if (this->coordinates[i].position != this->coverCoordinates[j].position) {
-//            final.push_back(this->coordinates[i]);
-//        } else {
-//            j++;
-//        }
-//    }
-//    cout << final.size()<<endl;
-//    this->newCoordinates = final;
-
-
 
     if (!this->absoluteCoordinates) {
         this->setFinalCoordinates();
@@ -206,6 +197,29 @@ vector<Coords> Compress::findCoverYCoordinates(vector<Coords> v, Coords refPoint
 
 bool operator==(const Coords& rhs, const Coords& lhs) {
     return rhs.position == lhs.position;
+}
+
+void Compress::setImageDimension(int width) {
+    this->width = width;
+}
+
+void Compress::scaleImage() {
+    for (int i = 0; i < this->coordinates.size() ; ++i) {
+        this->coordinates[i].x *= this->width / this->originalWidth;
+        this->coordinates[i].y *= this->width / this->originalWidth;
+    }
+}
+
+void Compress::setOriginalImageWidth(int width) {
+    this->originalWidth = width;
+}
+
+void Compress::setScale() {
+
+}
+
+float Compress::getScale() {
+    return this->width / this->originalWidth;
 }
 
 

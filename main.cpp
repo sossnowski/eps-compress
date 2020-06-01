@@ -8,10 +8,11 @@ int main(int argc, char *argv[]) {
     //UserInterface u = UserInterface();
     //u.displayInterface();
     //Trigger action button and get user file path
-    string filePath = "../epsFiles/przyklad.eps";
+    string filePath = "../epsFiles/EPSpunkty.eps";
+    int width = 100;
     //u.handleFile(filePath);
     File f = File(filePath);
-    f.processData();
+    f.processData(width);
 
 
 

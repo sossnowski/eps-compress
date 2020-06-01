@@ -1,3 +1,5 @@
 # Program to compress EPS files
-used external libraries: <br>
-SFML 2.5.1
+### To run: <br>
+`mkdir build` <br>
+`cmake ..` <br>
+`make`

@@ -22,7 +22,6 @@ private:
     float distanceBetweenPoints;
     float width;
     float originalWidth;
-    float scale;
 public:
     Compress() : numberOfCurrentLine(0), previousX(0), previousY(0), previousC(""), flag(true),
                 distanceBetweenPoints(1), absoluteCoordinates(false), width(0) {};
@@ -31,7 +30,6 @@ public:
     bool getAbsoluteCoordinatesFlag();
     void setImageDimension(int width);
     void setOriginalImageWidth(int width);
-    void setScale();
     void getCoordinatesFromFileData(string* dataToCompress);
     float getScale();
     void findCoverCoordinates();

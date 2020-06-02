@@ -8,7 +8,7 @@
 using namespace std;
 
 /**
- * Contructor
+ * Constructor
  * @param filePath
  */
 File::File(string filePath){
@@ -42,7 +42,6 @@ void File::processData(int width = 0) {
             // Get original file dimensions and scale them
             if (c == "%%BoundingBox:") {
                 co.setOriginalImageWidth(originalImageWidth);
-                float u = co.getScale();
                 originalImageWidth = originalImageWidth * co.getScale();
                 originalImageHeight = originalImageHeight * co.getScale();
                 ostringstream intToString;

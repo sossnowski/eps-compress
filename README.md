@@ -3,3 +3,5 @@
 `mkdir build` <br>
 `cmake ..` <br>
 `make`
+
+## Do kompilacji programu wymagane jest posiadanie zainstalowanej biblioteki **Bost** w wersji 1.72.0
